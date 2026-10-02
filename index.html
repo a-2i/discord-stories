@@ -1,192 +1,676 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Stories</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stories</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
-            margin: 0;
-            background: #313338;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+}
 
-        .stories {
-            display: flex;
-            gap: 15px;
-            padding: 20px;
-            background: #2b2d31;
-        }
+/* =========================
+   STORIES BAR
+========================= */
 
-        .story {
-            width: 70px;
-            padding: 0;
-            border: 0;
-            background: transparent;
-            color: white;
-            text-align: center;
-            cursor: pointer;
-        }
+.stories {
+    display: flex;
+    gap: 14px;
+    padding: 20px;
+    overflow-x: auto;
+}
 
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid #5865f2;
-            margin: auto;
-            background: #5865f2;
-            transition: transform 0.15s;
-        }
+.story {
+    width: 72px;
+    min-width: 72px;
+    text-align: center;
+    cursor: pointer;
+}
 
-        .story:hover .avatar {
-            transform: scale(1.08);
-        }
+.story-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, #ff004f, #ff8a00, #a600ff);
+}
 
-        .story p {
-            margin: 5px 0;
-            font-size: 12px;
-        }
+.story-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #111;
+}
 
-        .story-viewer {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #111214;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
+.story-name {
+    margin-top: 6px;
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 
-        .story-viewer.active {
-            display: flex;
-        }
+/* =========================
+   STORY VIEWER
+========================= */
 
-        .story-content {
-            position: relative;
-            width: min(420px, 90vw);
-            height: min(750px, 90vh);
-            border-radius: 15px;
-            overflow: hidden;
-            background: #18191c;
-        }
+.story-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
 
-        .story-image {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    display: none;
+    align-items: center;
+    justify-content: center;
 
-        .story-user {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 2;
-            font-weight: bold;
-            text-shadow: 0 1px 4px black;
-        }
+    background: rgba(0, 0, 0, 0.92);
+}
 
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 3;
-            width: 40px;
-            height: 40px;
-            border: 0;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            font-size: 22px;
-            cursor: pointer;
-        }
-    </style>
+.story-viewer.active {
+    display: flex;
+}
+
+/*
+   IMPORTANT:
+   The image is contained INSIDE this element.
+   Nothing can escape because of overflow:hidden.
+*/
+
+.story-content {
+    position: relative;
+
+    width: min(420px, 92vw);
+    height: min(750px, 92vh);
+
+    overflow: hidden;
+
+    border-radius: 16px;
+    background: #000;
+
+    isolation: isolate;
+}
+
+/* =========================
+   STORY IMAGE
+========================= */
+
+.story-image {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    z-index: 1;
+}
+
+/* =========================
+   DARK GRADIENT
+========================= */
+
+.story-gradient {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.55),
+            transparent 25%,
+            transparent 65%,
+            rgba(0,0,0,0.65)
+        );
+}
+
+/* =========================
+   TOP INFORMATION
+========================= */
+
+.story-top {
+    position: absolute;
+
+    top: 14px;
+    left: 14px;
+    right: 14px;
+
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.story-user-avatar {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    border: 2px solid white;
+}
+
+.story-user {
+    font-size: 14px;
+    font-weight: bold;
+
+    text-shadow: 0 1px 4px black;
+}
+
+/* =========================
+   CLOSE BUTTON
+========================= */
+
+.close-story {
+    position: absolute;
+
+    top: 12px;
+    right: 12px;
+
+    z-index: 10;
+
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0,0,0,0.55);
+
+    color: white;
+
+    font-size: 24px;
+
+    cursor: pointer;
+}
+
+.close-story:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.story-next,
+.story-prev {
+    position: absolute;
+
+    top: 50%;
+    transform: translateY(-50%);
+
+    z-index: 10;
+
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0,0,0,0.5);
+
+    color: white;
+
+    font-size: 25px;
+
+    cursor: pointer;
+}
+
+.story-next {
+    right: 10px;
+}
+
+.story-prev {
+    left: 10px;
+}
+
+.story-next:hover,
+.story-prev:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+/* =========================
+   PROGRESS BAR
+========================= */
+
+.story-progress {
+    position: absolute;
+
+    top: 7px;
+    left: 8px;
+    right: 8px;
+
+    z-index: 10;
+
+    height: 3px;
+
+    background: rgba(255,255,255,0.35);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.story-progress-bar {
+    width: 0%;
+    height: 100%;
+
+    background: white;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .story-content {
+        width: 100vw;
+        height: 100vh;
+
+        border-radius: 0;
+    }
+
+    .story-next {
+        right: 8px;
+    }
+
+    .story-prev {
+        left: 8px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-    <div class="stories">
+<!-- =========================
+     STORIES
+========================= -->
 
-        <button class="story" data-user="You" type="button">
-            <div class="avatar"></div>
-            <p>You</p>
-        </button>
+<div class="stories">
 
-        <button class="story" data-user="Amigo" type="button">
-            <div class="avatar"></div>
-            <p>Amigo</p>
-        </button>
+    <div class="story"
+         onclick="openStory(0)">
 
-        <button class="story" data-user="Ahmed" type="button">
-            <div class="avatar"></div>
-            <p>Ahmed</p>
-        </button>
+        <div class="story-avatar">
+            <img src="https://i.pravatar.cc/150?img=12"
+                 alt="User">
+        </div>
 
-    </div>
-
-    <div class="story-viewer" id="storyViewer">
-
-        <div class="story-content">
-
-            <img
-                class="story-image"
-                src="https://picsum.photos/400/700"
-                alt="Story"
-            >
-
-            <div class="story-user" id="storyUser">
-                User
-            </div>
-
-            <button class="close" id="closeStory" type="button">
-                ×
-            </button>
-
+        <div class="story-name">
+            User
         </div>
 
     </div>
 
-    <script>
-        const stories = document.querySelectorAll(".story");
-        const viewer = document.getElementById("storyViewer");
-        const closeButton = document.getElementById("closeStory");
-        const storyUser = document.getElementById("storyUser");
 
-        stories.forEach(function(story) {
-            story.addEventListener("click", function() {
-                storyUser.textContent = story.dataset.user;
-                viewer.classList.add("active");
-            });
-        });
+    <div class="story"
+         onclick="openStory(1)">
 
-        closeButton.addEventListener("click", function() {
-            viewer.classList.remove("active");
-        });
+        <div class="story-avatar">
+            <img src="https://i.pravatar.cc/150?img=32"
+                 alt="User">
+        </div>
 
-        viewer.addEventListener("click", function(event) {
-            if (event.target === viewer) {
-                viewer.classList.remove("active");
-            }
-        });
+        <div class="story-name">
+            Friend
+        </div>
 
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "Escape") {
-                viewer.classList.remove("active");
-            }
-        });
-    </script>
+    </div>
 
-</body>
-</html>
-        });
-    </script>
+
+    <div class="story"
+         onclick="openStory(2)">
+
+        <div class="story-avatar">
+            <img src="https://i.pravatar.cc/150?img=45"
+                 alt="User">
+        </div>
+
+        <div class="story-name">
+            Alex
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     STORY VIEWER
+========================= -->
+
+<div id="storyViewer"
+     class="story-viewer">
+
+    <div id="storyContent"
+         class="story-content">
+
+        <!-- IMAGE IS INSIDE THE FRAME -->
+        <img id="storyImage"
+             class="story-image"
+             src=""
+             alt="Story">
+
+        <!-- GRADIENT -->
+        <div class="story-gradient"></div>
+
+        <!-- PROGRESS -->
+        <div class="story-progress">
+            <div id="progressBar"
+                 class="story-progress-bar">
+            </div>
+        </div>
+
+        <!-- USER -->
+        <div class="story-top">
+
+            <img id="storyUserAvatar"
+                 class="story-user-avatar"
+                 src=""
+                 alt="">
+
+            <span id="storyUser"
+                  class="story-user">
+            </span>
+
+        </div>
+
+        <!-- CLOSE -->
+        <button id="closeStory"
+                class="close-story">
+            ×
+        </button>
+
+        <!-- PREVIOUS -->
+        <button class="story-prev"
+                onclick="previousStory(event)">
+            ‹
+        </button>
+
+        <!-- NEXT -->
+        <button class="story-next"
+                onclick="nextStory(event)">
+            ›
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   STORY DATA
+========================= */
+
+const stories = [
+
+    {
+        user: "User",
+        avatar: "https://i.pravatar.cc/150?img=12",
+        image: "https://picsum.photos/id/1015/900/1600"
+    },
+
+    {
+        user: "Friend",
+        avatar: "https://i.pravatar.cc/150?img=32",
+        image: "https://picsum.photos/id/1016/900/1600"
+    },
+
+    {
+        user: "Alex",
+        avatar: "https://i.pravatar.cc/150?img=45",
+        image: "https://picsum.photos/id/1025/900/1600"
+    }
+
+];
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const storyViewer =
+    document.getElementById("storyViewer");
+
+const storyImage =
+    document.getElementById("storyImage");
+
+const storyUser =
+    document.getElementById("storyUser");
+
+const storyUserAvatar =
+    document.getElementById("storyUserAvatar");
+
+const closeStoryButton =
+    document.getElementById("closeStory");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+
+let currentStory = 0;
+let progressTimer = null;
+
+
+/* =========================
+   OPEN STORY
+========================= */
+
+function openStory(index) {
+
+    currentStory = index;
+
+    storyViewer.classList.add("active");
+
+    loadStory();
+
+}
+
+
+/* =========================
+   LOAD STORY
+========================= */
+
+function loadStory() {
+
+    const story = stories[currentStory];
+
+    if (!story) {
+        closeStory();
+        return;
+    }
+
+    storyImage.src = story.image;
+
+    storyUser.textContent = story.user;
+
+    storyUserAvatar.src = story.avatar;
+
+    startProgress();
+
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+function startProgress() {
+
+    clearInterval(progressTimer);
+
+    progressBar.style.width = "0%";
+
+    let progress = 0;
+
+    progressTimer = setInterval(() => {
+
+        progress += 1;
+
+        progressBar.style.width =
+            progress + "%";
+
+        if (progress >= 100) {
+
+            clearInterval(progressTimer);
+
+            nextStory();
+
+        }
+
+    }, 50);
+
+}
+
+
+/* =========================
+   NEXT
+========================= */
+
+function nextStory(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    currentStory++;
+
+    if (currentStory >= stories.length) {
+
+        closeStory();
+
+        return;
+    }
+
+    loadStory();
+
+}
+
+
+/* =========================
+   PREVIOUS
+========================= */
+
+function previousStory(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    currentStory--;
+
+    if (currentStory < 0) {
+        currentStory = 0;
+    }
+
+    loadStory();
+
+}
+
+
+/* =========================
+   CLOSE
+========================= */
+
+function closeStory() {
+
+    clearInterval(progressTimer);
+
+    storyViewer.classList.remove("active");
+
+    storyImage.src = "";
+
+}
+
+
+/* =========================
+   CLOSE BUTTON
+========================= */
+
+closeStoryButton.addEventListener(
+    "click",
+    function(event) {
+
+        event.stopPropagation();
+
+        closeStory();
+
+    }
+);
+
+
+/* =========================
+   CLOSE WITH ESC
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Escape") {
+            closeStory();
+        }
+
+        if (
+            event.key === "ArrowRight" &&
+            storyViewer.classList.contains("active")
+        ) {
+            nextStory();
+        }
+
+        if (
+            event.key === "ArrowLeft" &&
+            storyViewer.classList.contains("active")
+        ) {
+            previousStory();
+        }
+
+    }
+);
+
+
+/* =========================
+   CLICK OUTSIDE FRAME
+========================= */
+
+storyViewer.addEventListener(
+    "click",
+    function(event) {
+
+        if (event.target === storyViewer) {
+            closeStory();
+        }
+
+    }
+);
+
+</script>
 
 </body>
 </html>
