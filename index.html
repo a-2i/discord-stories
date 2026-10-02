@@ -6,6 +6,10 @@
     <title>Discord Stories</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             background: #313338;
@@ -33,11 +37,68 @@
             border: 3px solid #5865f2;
             margin: auto;
             background: #5865f2;
+            transition: transform 0.15s;
+        }
+
+        .story:hover .avatar {
+            transform: scale(1.08);
         }
 
         .story p {
             margin: 5px 0;
             font-size: 12px;
+        }
+
+        .story-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #111214;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .story-viewer.active {
+            display: flex;
+        }
+
+        .story-content {
+            width: min(420px, 90vw);
+            height: min(750px, 90vh);
+            background: linear-gradient(160deg, #5865f2, #18191c);
+            border-radius: 15px;
+            position: relative;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .story-content h2 {
+            font-size: 28px;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            border: 0;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .story-user {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -46,22 +107,66 @@
 
     <div class="stories">
 
-        <div class="story">
+        <button class="story" data-user="You" type="button">
             <div class="avatar"></div>
             <p>You</p>
-        </div>
+        </button>
 
-        <div class="story">
+        <button class="story" data-user="Amigo" type="button">
             <div class="avatar"></div>
             <p>Amigo</p>
-        </div>
+        </button>
 
-        <div class="story">
+        <button class="story" data-user="Ahmed" type="button">
             <div class="avatar"></div>
             <p>Ahmed</p>
+        </button>
+
+    </div>
+
+    <div class="story-viewer" id="storyViewer">
+
+        <div class="story-content">
+            <div class="story-user" id="storyUser"></div>
+
+            <button class="close" id="closeStory" type="button">
+                ×
+            </button>
+
+            <h2 id="storyText">This is a Story!</h2>
         </div>
 
     </div>
+
+    <script>
+        const stories = document.querySelectorAll(".story");
+        const viewer = document.getElementById("storyViewer");
+        const closeButton = document.getElementById("closeStory");
+        const storyUser = document.getElementById("storyUser");
+
+        stories.forEach(story => {
+            story.addEventListener("click", () => {
+                storyUser.textContent = story.dataset.user;
+                viewer.classList.add("active");
+            });
+        });
+
+        closeButton.addEventListener("click", () => {
+            viewer.classList.remove("active");
+        });
+
+        viewer.addEventListener("click", event => {
+            if (event.target === viewer) {
+                viewer.classList.remove("active");
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                viewer.classList.remove("active");
+            }
+        });
+    </script>
 
 </body>
 </html>
